@@ -30,7 +30,7 @@ function App() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/bugs/analyze",
+        "https://debugmind-backend.onrender.com/api/bugs/analyze",
         {
           language,
           code,
@@ -49,7 +49,7 @@ toast.error("Analysis failed. Please try again.");
         errorType: "Error",
         rootCause: "Unable to analyze the code.",
         explanation:
-          "Please make sure the backend server and Ollama are running.",
+          "Unable to connect to the AI service. Please try again later.",
         fixedCode: "",
         alternativeFix: "",
         summary: "",
