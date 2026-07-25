@@ -1,47 +1,53 @@
-const axios = require("axios");
+const OpenAI = require("openai");
 const buildPrompt = require("../utils/promptBuilder");
 const parseAIResponse = require("../utils/responseParser");
+
+const client = new OpenAI({
+    apiKey: process.env.GROQ_API_KEY,
+    baseURL: "https://api.groq.com/openai/v1",
+});
 
 const analyzeWithLLM = async(language, code, error, userPrompt) => {
     try {
         const AIprompt = buildPrompt(language, code, error, userPrompt);
 
-        console.log("\n========== PROMPT SENT TO OLLAMA ==========\n");
+        console.log("\n========== PROMPT SENT TO GROQ ==========\n");
         console.log(AIprompt);
 
-        const response = await axios.post(
-            "http://localhost:11434/api/generate", {
-                model: "qwen2.5-coder:3b",
-                prompt: AIprompt,
-                stream: false,
-            }, {
-                timeout: 120000,
-            }
-        );
+        const completion = await client.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            messages: [{
+                    role: "system",
+                    content: "You are an expert software engineer. Always return ONLY valid JSON without markdown fences or explanations.",
+                },
+                {
+                    role: "user",
+                    content: AIprompt,
+                },
+            ],
+            temperature: 0.2,
+        });
 
-        if (!response.data || !response.data.response) {
-            throw new Error("Empty response received from Ollama.");
-        }
+        const aiResponse = completion.choices[0].message.content;
 
         console.log("\n========== RAW AI RESPONSE ==========\n");
-        console.log(response.data.response);
+        console.log(aiResponse);
 
-        const parsedResponse = parseAIResponse(response.data.response);
+        const parsedResponse = parseAIResponse(aiResponse);
 
         console.log("\n========== PARSED RESPONSE ==========\n");
         console.log(parsedResponse);
 
         return parsedResponse;
-
     } catch (error) {
-        console.error("\n========== LLM SERVICE ERROR ==========\n");
+        console.error("\n========== GROQ ERROR ==========\n");
         console.error(error);
 
         return {
             language: "Unknown",
             errorType: "Error",
             rootCause: "AI request failed.",
-            explanation: "Unable to connect to the AI model or parse the response.",
+            explanation: "Unable to connect to Groq or parse the response.",
             fixedCode: "",
             alternativeFix: "",
             summary: "",
