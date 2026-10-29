@@ -1,12 +1,14 @@
- const PromptBox = ({ userPrompt, setUserPrompt }) => {
+const PromptBox = ({ prompt, setPrompt, userPrompt, setUserPrompt }) => {
+  const value = prompt !== undefined ? prompt : userPrompt || "";
+  const handleChange = (e) => {
+    if (setPrompt) setPrompt(e.target.value);
+    if (setUserPrompt) setUserPrompt(e.target.value);
+  };
+
   return (
     <div className="mt-6">
-
       <div className="mb-3">
-        <h2 className="text-lg font-semibold text-white">
-          Ask AI
-        </h2>
-
+        <h2 className="text-lg font-semibold text-white">Ask AI</h2>
         <p className="text-sm text-zinc-400 mt-1">
           Add optional instructions for the AI.
         </p>
@@ -14,14 +16,9 @@
 
       <textarea
         rows={4}
-       value={userPrompt}
-onChange={(e) => setUserPrompt(e.target.value)}
-        placeholder="Examples:
-• Explain the bug step by step
-• Optimize the code
-• Suggest a better approach
-• Improve readability
-• Reduce time complexity"
+        value={value}
+        onChange={handleChange}
+        placeholder="Examples:&#10;• Explain the bug step by step&#10;• Optimize the code&#10;• Suggest a better approach&#10;• Improve readability&#10;• Reduce time complexity"
         className="
           w-full
           bg-[#18181B]
@@ -43,11 +40,8 @@ onChange={(e) => setUserPrompt(e.target.value)}
 
       <p className="text-xs text-zinc-500 mt-3">
         💡 Your instructions will be included automatically when you click
-        <span className="text-emerald-400 font-medium">
-          {" "}Analyze Code
-        </span>.
+        <span className="text-emerald-400 font-medium"> Analyze Code</span>.
       </p>
-
     </div>
   );
 };
